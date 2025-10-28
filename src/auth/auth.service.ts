@@ -26,7 +26,10 @@ export class AuthService {
         },
       });
 
-      return this.signToken(user.id, user.hash);
+      const token = this.signToken(user.id, user.email);
+      console.log(token);
+
+      return token;
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
@@ -54,18 +57,21 @@ export class AuthService {
     }
   }
 
-  async signToken(userID: Number, email: String): Promise<{ token }> {
+  async signToken(userID: Number, email: String) {
     const payload = {
       sub: userID,
       email,
     };
 
     const secret = this.config.get('JWT_SECRET');
+    console.log(secret);
 
-    const token = this.jwt.signAsync(payload, {
+    const token = await this.jwt.signAsync(payload, {
       expiresIn: '15m',
       secret: secret,
     });
+
+    console.log(token);
 
     return {
       token: token,
